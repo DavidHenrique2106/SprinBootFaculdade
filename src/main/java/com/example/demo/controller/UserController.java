@@ -1,40 +1,50 @@
 package com.example.demo.controller;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-
-
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/users")
 public class UserController {
 
+    private Map<String, String> userDatabase = new HashMap<>();
 
-    @GetMapping("/userIdBody")
-    public String getMethodName(@RequestBody String use) {
-        return "ResPosta " + use;
+    @PostMapping
+    public String createUser(@RequestBody Map<String, String> user) {
+        String id = user.get("id");
+        String name = user.get("name");
+        userDatabase.put(id, name);
+        return "Usuário criado: ID = " + id + ", Nome = " + name;
     }
-    
 
-
-    
-    @GetMapping("/user/{id}")
+    @GetMapping("/{id}")
     public String getUserById(@PathVariable String id) {
-        return "Cliente numero "+ id;
+        String user = userDatabase.get(id);
+        return user != null ? "Usuário encontrado: ID =     " + id + ", Nome = " + user : "Usuário com ID = " + id + " não encontrado.";
     }
-    
 
-
-    @GetMapping("/hello")
-    public String HelloWorld() {
-        return "Hello World Mfk";
+    @GetMapping
+    public Map<String, String> getAllUsers() {
+        return userDatabase;
     }
-    
 
+    @PutMapping("/{id}")
+    public String updateUser(@PathVariable String id, @RequestBody Map<String, String> updatedUser) {
+        if (userDatabase.containsKey(id)) {
+            userDatabase.put(id, updatedUser.get("name"));
+            return "Usuário atualizado: ID = " + id + ", Novo Nome = " + updatedUser.get("name");
+        }
+        return "Usuário com ID = " + id + " não encontrado.";
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteUser(@PathVariable String id) {
+        if (userDatabase.containsKey(id)) {
+            userDatabase.remove(id);
+            return "Usuário com ID = " + id + " foi removido.";
+        }
+        return "Usuário com ID = " + id + " não encontrado.";
+    }
 }
